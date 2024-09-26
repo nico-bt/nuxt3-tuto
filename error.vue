@@ -12,7 +12,8 @@
 const error = useError()
 
 function handleClick() {
-  navigateTo("/")
+  clearError({ redirect: "/" })
+  // navigateTo("/")
 }
 </script>
 

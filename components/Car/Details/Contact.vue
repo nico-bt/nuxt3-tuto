@@ -11,3 +11,7 @@
     <button class="bg-blue-400 text-white px-10 py-3 rounded mt-4">Submit</button>
   </div>
 </template>
+
+<script setup>
+const props = defineProps({ car: Object })
+</script>
