@@ -14,10 +14,9 @@
 const route = useRoute()
 const { carName, carId } = route.params
 
-const { cars } = useCars()
+const { data: car, error } = await useFetch("/api/car/" + carId)
 
-const car = cars.find((car) => car.id == carId)
-if (!car) {
+if (error.value || !car.value) {
   throw createError({ statusCode: 404, statusMessage: "Car not found with id " + carId })
 }
 </script>
