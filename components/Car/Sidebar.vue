@@ -133,7 +133,7 @@ function onChangePrice() {
   }
 
   updateModal("price")
-  // navigateTo(`/city/${route.params.city}/car/${route.params.make}${query}`)
+  // navigateTo(`/city/${route.params.city}/car/${route.params.make}?minPrice=${query.minPrice}`)
   // better and easy to read:
   router.push({ query })
 }
