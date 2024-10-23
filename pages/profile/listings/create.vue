@@ -3,6 +3,7 @@ definePageMeta({
   layout: "custom",
 })
 
+const user = useSupabaseUser()
 const { makes } = useCars()
 
 const info = useState("adInfo", () => {
@@ -16,9 +17,11 @@ const info = useState("adInfo", () => {
     seats: "",
     features: "",
     description: "",
-    image: null,
+    image: "future-Url",
   }
 })
+
+const errorMessage = ref("")
 
 const onChangeInput = (data, name) => {
   info.value[name] = data
@@ -39,29 +42,70 @@ const inputs = [
   },
   {
     id: 3,
+    title: "Price *",
+    name: "price",
+    placeholder: "20040",
+  },
+  {
+    id: 4,
     title: "Miles *",
     name: "miles",
     placeholder: "10000",
   },
   {
-    id: 4,
+    id: 5,
     title: "City *",
     name: "city",
     placeholder: "Austin",
   },
   {
-    id: 5,
+    id: 6,
     title: "Number of Seats *",
     name: "seats",
     placeholder: "5",
   },
   {
-    id: 6,
+    id: 7,
     title: "Features *",
     name: "features",
     placeholder: "Leather Interior, No Accidents",
   },
 ]
+
+const isButtonDisabled = computed(() => {
+  for (let key in info.value) {
+    if (!info.value[key]) {
+      return true
+    }
+  }
+  return false
+})
+
+const handleSubmit = async () => {
+  const body = {
+    ...info.value,
+    features: info.value.features.split(", "),
+    city: info.value.city.toLowerCase(),
+    numberOfSeats: +info.value.seats,
+    miles: +info.value.miles,
+    price: +info.value.price,
+    year: +info.value.year,
+    name: info.value.make + "-" + info.value.model,
+    listerId: user.value.id,
+  }
+
+  delete body.seats
+
+  try {
+    const response = await $fetch("/api/car/listings", {
+      method: "POST",
+      body,
+    })
+    navigateTo("/profile/listings")
+  } catch (error) {
+    errorMessage.value = error.statusMessage
+  }
+}
 </script>
 
 <template>
@@ -86,6 +130,18 @@ const inputs = [
         @change-input="onChangeInput"
       />
       <CarAdImage @change-input="onChangeInput" />
+
+      <div>
+        <button
+          :disabled="isButtonDisabled"
+          :class="isButtonDisabled ? 'bg-gray-400 cursor-not-allowed' : ''"
+          class="bg-blue-400 text-white rounded py-2 px-7 mt-4"
+          @click="handleSubmit"
+        >
+          Submit
+        </button>
+        <p v-if="errorMessage" class="mt-4 text-red-500">{{ errorMessage }}</p>
+      </div>
     </div>
   </div>
 </template>

@@ -12,7 +12,7 @@
 
 <script setup>
 const route = useRoute()
-const { carName, carId } = route.params
+const { carId } = route.params
 
 const { data: car, error } = await useFetch("/api/car/" + carId)
 

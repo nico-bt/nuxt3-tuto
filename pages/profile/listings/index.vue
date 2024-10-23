@@ -1,5 +1,16 @@
 <script setup>
-const { listings } = useCars()
+const user = useSupabaseUser()
+
+const { data: listings, refresh } = await useFetch("/api/car/listings/user/" + user.value.id)
+
+const handleDelete = async (id) => {
+  try {
+    const response = await $fetch("/api/car/listings/" + id, { method: "DELETE" })
+    refresh()
+  } catch (error) {
+    console.log(error)
+  }
+}
 </script>
 
 <template>
@@ -13,7 +24,12 @@ const { listings } = useCars()
       >
     </div>
     <div class="shadow rounded p-3 mt-5">
-      <CarListingCard v-for="listing in listings" :key="listing.id" :listing="listing" />
+      <CarListingCard
+        v-for="listing in listings"
+        :key="listing.id"
+        :listing="listing"
+        @delete-click="handleDelete"
+      />
     </div>
   </div>
 </template>
