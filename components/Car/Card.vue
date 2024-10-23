@@ -7,7 +7,7 @@
       @click.prevent="handleLike"
     />
     <div class="flex h-full w-full" @click="navigateTo(`/car/${car.id}`)">
-      <NuxtImg :src="car.image" alt="" class="w-[300px] h-full" />
+      <NuxtImg :src="car.image" alt="" class="w-[300px] h-full object-cover" />
       <div class="p-4 flex flex-col">
         <div>
           <h1 class="text-2xl text-blue-700">{{ car.name }}</h1>

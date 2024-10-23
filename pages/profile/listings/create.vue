@@ -2,8 +2,10 @@
 definePageMeta({
   layout: "custom",
 })
-
+const config = useRuntimeConfig()
 const user = useSupabaseUser()
+const supabase = useSupabaseClient()
+
 const { makes } = useCars()
 
 const info = useState("adInfo", () => {
@@ -17,11 +19,12 @@ const info = useState("adInfo", () => {
     seats: "",
     features: "",
     description: "",
-    image: "future-Url",
+    image: null,
   }
 })
 
 const errorMessage = ref("")
+const loading = ref(false)
 
 const onChangeInput = (data, name) => {
   info.value[name] = data
@@ -78,10 +81,26 @@ const isButtonDisabled = computed(() => {
       return true
     }
   }
+  if (loading.value) {
+    return true
+  }
   return false
 })
 
 const handleSubmit = async () => {
+  loading.value = true
+
+  const fileImageName = crypto.randomUUID()
+
+  const { data, error } = await supabase.storage
+    .from("images")
+    .upload("public/" + fileImageName, info.value.image)
+
+  if (error) {
+    loading.value = false
+    return (errorMessage.value = "Cannot upload image")
+  }
+
   const body = {
     ...info.value,
     features: info.value.features.split(", "),
@@ -92,6 +111,7 @@ const handleSubmit = async () => {
     year: +info.value.year,
     name: info.value.make + "-" + info.value.model,
     listerId: user.value.id,
+    image: config.public.supabase.url + "/storage/v1/object/public/images/" + data.path,
   }
 
   delete body.seats
@@ -104,6 +124,10 @@ const handleSubmit = async () => {
     navigateTo("/profile/listings")
   } catch (error) {
     errorMessage.value = error.statusMessage
+    await supabase.storage.from("images").remove(data.path)
+  } finally {
+    loading.value = false
+    info.value.image = null
   }
 }
 </script>
@@ -138,7 +162,7 @@ const handleSubmit = async () => {
           class="bg-blue-400 text-white rounded py-2 px-7 mt-4"
           @click="handleSubmit"
         >
-          Submit
+          {{ loading ? "Loading..." : "Submit" }}
         </button>
         <p v-if="errorMessage" class="mt-4 text-red-500">{{ errorMessage }}</p>
       </div>
